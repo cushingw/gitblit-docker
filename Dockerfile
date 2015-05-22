@@ -36,7 +36,7 @@ run sed -e "s/server\.httpsPort\s=\s8443/server\.httpsPort=0/" \
         -e "s/web\.enableRpcManagement\s=\sfalse/web\.enableRpcManagement=true/" \
         -e "s/web\.enableRpcAdministration\s=\sfalse/web.enableRpcAdministration=true/" \
         -e "s/server\.contextPath\s=\s\//server.contextPath=\/gitblit\//" \
-        -e "s:web.canonicalUrl\s=:web.canonicalUrl = http://cap.elderresearch.com" \
+        -e "s;web.canonicalUrl\s=;web.canonicalUrl = http://cap.elderresearch.com;" \
         /opt/gitblit-data/default.properties > /opt/gitblit-data/gitblit.properties
 
 
