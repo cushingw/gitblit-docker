@@ -1,49 +1,28 @@
-# Basics
-#
-from ubuntu:latest
-maintainer James Moger <james.moger@gitblit.com>
-run apt-get update
-run apt-get install -q -y git-core redis-server
+FROM jmoger/gitblit
 
-# Install Java 7
+MAINTAINER Elder Research, Inc.
 
-run DEBIAN_FRONTEND=noninteractive apt-get install -q -y software-properties-common
-run DEBIAN_FRONTEND=noninteractive apt-get install -q -y python-software-properties
-run DEBIAN_FRONTEND=noninteractive apt-add-repository ppa:webupd8team/java -y
-run apt-get update
-run echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
-run DEBIAN_FRONTEND=noninteractive apt-get install oracle-java7-installer -y
+ENV LOGICAL_HOSTNAME cap.elderrearch.com
 
-# Install Gitblit
-
-run apt-get install -q -y curl
-run curl -Lks http://dl.bintray.com/gitblit/releases/gitblit-1.6.2.tar.gz -o /root/gitblit.tar.gz
-run mkdir -p /opt/gitblit
-run tar zxf /root/gitblit.tar.gz -C /opt/gitblit
-run rm -f /root/gitblit.tar.gz
-
-# Move the data files to a separate directory
-run mkdir -p /opt/gitblit-data
-run mv /opt/gitblit/data/* /opt/gitblit-data
-run mv /opt/gitblit-data/gitblit.properties /opt/gitblit-data/default.properties
-
-# Adjust the default Gitblit settings to bind to 80, 9418, 29418, and allow RPC administration.
-#
-# Note: we are writing to a different file here because sed doesn't like to the same file it
-# is streaming.  This is why the original properties file was renamed earlier.
-run sed -e "s/server\.httpsPort\s=\s8443/server\.httpsPort=0/" \
-        -e "s/server\.httpPort\s=\s0/server\.httpPort=80/" \
-        -e "s/web\.enableRpcManagement\s=\sfalse/web\.enableRpcManagement=true/" \
-        -e "s/web\.enableRpcAdministration\s=\sfalse/web.enableRpcAdministration=true/" \
-        -e "s/server\.contextPath\s=\s\//server.contextPath=\/gitblit\//" \
-        -e "s;web.canonicalUrl\s=;web.canonicalUrl = http://cap.elderresearch.com;" \
+RUN sed -e "s;^server.httpsPort.*;server.httpsPort=0;" \
+        -e "s;^server.httpPort.*;server.httpPort=80;" \
+        -e "s;^web.enableRpcManagement.*;web.enableRpcManagement=true;" \
+        -e "s;^web.enableRpcAdministration.*;web.enableRpcAdministration=true;" \
+        -e "s;^server.contextPath.*;server.contextPath=/gitblit/;" \
+        -e "s;^web.canonicalUrl.*;web.canonicalUrl = http://${LOGICAL_HOSTNAME};" \
+        -e "s;^realm.authenticationProviders.*;realm.authenticationProvider=ldap;" \
+        -e "s;^realm.ldap.server.*;realm.ldap.server=ldap://ldap:389;" \
+        -e "s;^realm.ldap.accountBase.*;realm.ldap.accountBase = DC=cap,DC=elderresearch,DC=com;" \
+        -e "s;^realm.ldap.groupBase.*;realm.ldap.groupBase = OU=Groups,DC=cho,DC=elderresearch,DC=com;" \
+        -e "s;^realm.ldap.accountPattern.*$;realm.ldap.accountPattern = (\&(objectClass=person)(uid=\$\{username\}));" \
+        -e "s;^realm.ldap.admins.*;realm.ldap.admins=@\"Gitblit Admins\";" \
+        -e "s;^realm.ldap.groupMemberPattern.*;realm.ldap.groupMemberPattern=(\&(objectClass=groupofnames)(member=\$\{dn\}));"\
+        -e "s;^realm.ldap.groupEmptyMemberPattern.*;realm.ldap.groupEmptyMemberPattern=(\&(objectClass=groupofnames)(!(member=*)));" \
         /opt/gitblit-data/default.properties > /opt/gitblit-data/gitblit.properties
 
+ADD log4j.properties /opt/gitblit-data/
 
-# Setup the Docker container environment and run Gitblit
 VOLUME /opt/gitblit-data
-workdir /opt/gitblit
-expose 80
-expose 9418
-expose 29418
-cmd ["java", "-server", "-Xmx1024M", "-Djava.awt.headless=true", "-jar", "/opt/gitblit/gitblit.jar", "--baseFolder", "/opt/gitblit-data"]
+
+# cmd ["java", "-server", "-Xmx1024M", "-Djava.awt.headless=true", "-Dlog4j.configuration=${GITBLIT_DATA}/log4j.properties", "-jar", "/opt/gitblit/gitblit.jar", "--baseFolder", "/opt/gitblit-data"]
+CMD ["java", "-server", "-Xmx1024M", "-Djava.awt.headless=true", "-jar", "/opt/gitblit/gitblit.jar", "--baseFolder", "/opt/gitblit-data"]
