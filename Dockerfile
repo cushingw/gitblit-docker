@@ -10,7 +10,7 @@ RUN sed -e "s;^server.httpsPort.*;server.httpsPort=0;" \
         -e "s;^web.enableRpcAdministration.*;web.enableRpcAdministration=true;" \
         -e "s;^server.contextPath.*;server.contextPath=/gitblit/;" \
         -e "s;^web.canonicalUrl.*;web.canonicalUrl = http://${LOGICAL_HOSTNAME};" \
-        -e "s;^realm.authenticationProviders.*;realm.authenticationProvider=ldap;" \
+        -e "s;^realm.authenticationProviders.*;realm.authenticationProviders = ldap;" \
         -e "s;^realm.ldap.server.*;realm.ldap.server=ldap://ldap:389;" \
         -e "s;^realm.ldap.accountBase.*;realm.ldap.accountBase = DC=cap,DC=elderresearch,DC=com;" \
         -e "s;^realm.ldap.groupBase.*;realm.ldap.groupBase = OU=Groups,DC=cho,DC=elderresearch,DC=com;" \
