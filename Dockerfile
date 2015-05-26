@@ -20,9 +20,6 @@ RUN sed -e "s;^server.httpsPort.*;server.httpsPort=0;" \
         -e "s;^realm.ldap.groupEmptyMemberPattern.*;realm.ldap.groupEmptyMemberPattern=(\&(objectClass=groupofnames)(!(member=*)));" \
         /opt/gitblit-data/default.properties > /opt/gitblit-data/gitblit.properties
 
-ADD log4j.properties /opt/gitblit-data/
-
 VOLUME /opt/gitblit-data
 
-# cmd ["java", "-server", "-Xmx1024M", "-Djava.awt.headless=true", "-Dlog4j.configuration=${GITBLIT_DATA}/log4j.properties", "-jar", "/opt/gitblit/gitblit.jar", "--baseFolder", "/opt/gitblit-data"]
 CMD ["java", "-server", "-Xmx1024M", "-Djava.awt.headless=true", "-jar", "/opt/gitblit/gitblit.jar", "--baseFolder", "/opt/gitblit-data"]
