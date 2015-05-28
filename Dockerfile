@@ -4,6 +4,7 @@ MAINTAINER Elder Research, Inc.
 
 ENV LOGICAL_HOSTNAME cap.elderresearch.com
 
+# TODO: Just externalize the darn file.
 RUN sed -e "s;^server.httpsPort.*;server.httpsPort=0;" \
         -e "s;^server.httpPort.*;server.httpPort=80;" \
         -e "s;^web.enableRpcManagement.*;web.enableRpcManagement=true;" \
@@ -13,7 +14,7 @@ RUN sed -e "s;^server.httpsPort.*;server.httpsPort=0;" \
         -e "s;^realm.authenticationProviders.*;realm.authenticationProviders = ldap;" \
         -e "s;^realm.ldap.server.*;realm.ldap.server=ldap://ldap:389;" \
         -e "s;^realm.ldap.accountBase.*;realm.ldap.accountBase = DC=cap,DC=elderresearch,DC=com;" \
-        -e "s;^realm.ldap.groupBase.*;realm.ldap.groupBase = OU=Groups,DC=cho,DC=elderresearch,DC=com;" \
+        -e "s;^realm.ldap.groupBase.*;realm.ldap.groupBase = OU=Groups,DC=cap,DC=elderresearch,DC=com;" \
         -e "s;^realm.ldap.accountPattern.*$;realm.ldap.accountPattern = (\&(objectClass=person)(uid=\$\{username\}));" \
         -e "s;^realm.ldap.admins.*;realm.ldap.admins=\"@Gitblit Admin\" sfitch;" \
         -e "s;^realm.ldap.groupMemberPattern.*;realm.ldap.groupMemberPattern=(\&(objectClass=groupofnames)(member=\$\{dn\}));"\
@@ -22,6 +23,7 @@ RUN sed -e "s;^server.httpsPort.*;server.httpsPort=0;" \
         -e "s;^realm.ldap.email.*;realm.ldap.email = \$\{givenName\}.\$\{sn\}@datamininglab.com;" \
         -e "s;^realm.ldap.synchronize.*;realm.ldap.synchronize = true;" \
         -e "s;^realm.ldap.maintainTeams.*;realm.ldap.maintainTeams = true;" \
+        -e "s;^web.summaryShowReadme.*;web.summaryShowReadme = true;" \
         /opt/gitblit-data/default.properties > /opt/gitblit-data/gitblit.properties
 
 VOLUME /opt/gitblit-data
