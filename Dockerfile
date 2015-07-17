@@ -22,26 +22,15 @@ run mkdir -p /opt/gitblit
 run tar zxf /root/gitblit.tar.gz -C /opt/gitblit
 run rm -f /root/gitblit.tar.gz
 
-# Move the data files to a separate directory
-run mkdir -p /opt/gitblit-data
-run mv /opt/gitblit/data/* /opt/gitblit-data
-run mv /opt/gitblit-data/gitblit.properties /opt/gitblit-data/default.properties
 
-# Adjust the default Gitblit settings to bind to 80, 9418, 29418, and allow RPC administration.
-#
-# Note: we are writing to a different file here because sed doesn't like to the same file it
-# is streaming.  This is why the original properties file was renamed earlier.
-run sed -e "s/server\.httpsPort\s=\s8443/server\.httpsPort=0/" \
-        -e "s/server\.httpPort\s=\s0/server\.httpPort=80/" \
-        -e "s/web\.enableRpcManagement\s=\sfalse/web\.enableRpcManagement=true/" \
-        -e "s/web\.enableRpcAdministration\s=\sfalse/web.enableRpcAdministration=true/" \
-        -e "s/server\.contextPath\s=\s\//server.contextPath=\/gitblit\//" \
-        /opt/gitblit-data/default.properties > /opt/gitblit-data/gitblit.properties
+run mkdir -p /opt/gitblit-data
 
 # Setup the Docker container environment and run Gitblit
 VOLUME /opt/gitblit-data
 workdir /opt/gitblit
+copy run.sh /bin/
+run chmod 755 /bin/run.sh
 expose 80
 expose 9418
 expose 29418
-cmd ["java", "-server", "-Xmx1024M", "-Djava.awt.headless=true", "-jar", "/opt/gitblit/gitblit.jar", "--baseFolder", "/opt/gitblit-data"]
+cmd ["/bin/run.sh"]
